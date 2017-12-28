@@ -87,3 +87,11 @@ e.g.
 There syntax of a prefix operator is  <prefix operator><expression> therefore the ast node for a prefix operator must be able to point to an expression. 
 
 
+#### 4. Infix Operators - binary expression. 
+These involve one operator and two literals or operands. 
+<expression> <operator> <expression> 
+e.g.  5 == 5 , 5 < 5, 5 <= 5 etc. 
+
+
+
+

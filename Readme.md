@@ -93,5 +93,38 @@ These involve one operator and two literals or operands.
 e.g.  5 == 5 , 5 < 5, 5 <= 5 etc. 
 
 
+#### 5. If Statements 
+The if statements are of the following format: 
+if <condition> <consequence> else <alternative> 
+
+#### 6. Function statements 
+Functions are of the format 
+fn <parameters> <block statements>
+ 
+Function structure are much more complex as they can be either: 
+* Defined as a function independently. 
+
+    `fn (x, y) {
+        return x+y
+    }`
+* Defined to a variable using let 
+
+    `let myFunc = fn(x, y) {return x+y}`
+
+* Returned from another function 
+    
+    `fn(){
+        return fn(x,y) {return x+y} 
+    }` 
+ 
+* Using a function literal as an algorithm when calling another function 
+   `myFunc(x , y , fn(x,y) {return x + y})`
 
 
+#### 7.Call Expressions
+Calls to methods and functions are called call expressions and they are of the following format 
+
+<expression0> ( expression1, expression2, ... ) 
+
+* add (2, 3, 4 * 9)
+* callFunc(2,3 fn( a,b ){ x + y; }); 

@@ -7,6 +7,7 @@ import (
 	"go-interpreter-lexer/lexer"
 	"go-interpreter-lexer/parser"
 	"go-interpreter-lexer/evaluator"
+	"go-interpreter-lexer/object"
 )
 
 const PROMPT ="$> "
@@ -26,6 +27,7 @@ const MONKEY_FACE = `            __,__
 
 func Start(in io.Reader, out io.Writer){
 	scanner := bufio.NewScanner(in)
+	env := object.NewEnvironment()
 
 	for{
 		fmt.Printf(PROMPT)
@@ -42,13 +44,12 @@ func Start(in io.Reader, out io.Writer){
 			printParseErrors(out,p.Errors())
 			continue
 		}
-		evaluated := evaluator.Eval(program)
+		evaluated := evaluator.Eval(program, env)
 
 		if evaluated != nil{
 			io.WriteString(out, evaluated.Inspect())
 			io.WriteString(out,"\n")
 		}
-
 		/*io.WriteString(out, program.String())
 		io.WriteString(out, "\n")*/
 	}

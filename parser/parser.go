@@ -108,6 +108,7 @@ func New(l *lexer.Lexer) *Parser{
 	p.registerPrefixFn(token.LPAREN, p.parseGroupExpression)
 	p.registerPrefixFn(token.IF, p.parseIfExpression)
 	p.registerPrefixFn(token.FUNCTION, p.parseFunctionLiteral)
+	p.registerPrefixFn(token.STRING, p.parseStringLiteral)
 
 	// adding support for the INFIX parser operators.
     p.infixParseFuncs = make(map[token.TokenType]infixParseFn)
@@ -127,6 +128,10 @@ func New(l *lexer.Lexer) *Parser{
 	return p
 }
 
+func (p *Parser) parseStringLiteral() ast.Expression{
+	return &ast.StringLiteral{ Token: p.curToken, Value: p.curToken.Literal}
+}
+
 func (p *Parser) parseCallExpression(fn ast.Expression) ast.Expression {
 	ce := &ast.CallExpression{Token: p.curToken, Function: fn}
 	ce.Arguments = p.parseCallArguments()
@@ -137,7 +142,7 @@ func (p *Parser) parseCallArguments() []ast.Expression{
 	args := []ast.Expression{}
 
 	// handle the situation where the call does not have any arguments.
-	if p.peekTokenIs(token.LPAREN){
+	if p.peekTokenIs(token.RPAREN){
 		p.nextToken()
 		return args
 	}

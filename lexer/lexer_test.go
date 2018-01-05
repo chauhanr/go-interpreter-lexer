@@ -46,7 +46,8 @@ if (5 < 10) {
 
 10 == 10;
 9 != 10;
-
+"foobar";
+"bar foo";
 `,
 
 		[]expectedTokens{
@@ -123,10 +124,15 @@ if (5 < 10) {
 			{token.NOT_EQ, "!="},
 			{token.INT, "10"},
 			{token.SEMICOLON, ";"},
+			{token.STRING, "foobar"},
+			{token.SEMICOLON, ";"},
+			{token.STRING, "bar foo"},
+			{token.SEMICOLON, ";"},
 			{token.EOF, ""},
+
+
 		},
 	},
-
 }
 
 func TestNextToken(t *testing.T){

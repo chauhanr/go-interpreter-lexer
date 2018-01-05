@@ -71,19 +71,22 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 					return args[0]
 				}
 				return applyFunction(function, args)
+		case *ast.StringLiteral:
+			return &object.String{Value: node.Value}
 	}
 	return nil
 }
 
 func applyFunction(fn object.Object, args []object.Object) object.Object{
-	function, ok := fn.(*object.Function)
-	if !ok {
-		return newError("not a valid function: %s", fn.Type())
+	switch function := fn.(type){
+		case *object.Function:
+			extendedEnv := extendedFunctionEnv(function,args)
+			evaluated := Eval(function.Body,extendedEnv)
+			return unwrapReturnValue(evaluated)
+		case *object.Builtin:
+			return function.Fn(args ...)
 	}
-	extendedEnv := extendedFunctionEnv(function,args)
-	evaluated := Eval(function.Body,extendedEnv)
-
-	return unwrapReturnValue(evaluated)
+	return newError("not a valid function: %s", fn.Type())
 }
 
 func extendedFunctionEnv(fn *object.Function, args []object.Object) *object.Environment{
@@ -118,10 +121,14 @@ func evalExpressions(exps []ast.Expression, env *object.Environment) []object.Ob
 func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object{
 
 	val, ok := env.Get(node.Value)
-	if !ok {
-		return newError("identifier not found: "+node.Value)
+	if ok {
+		return val
 	}
-	return val
+	if builtin, ok := builtins[node.Value]; ok{
+		return builtin
+	}
+
+	return newError("identifier not found: "+node.Value)
 }
 
 func evalBlockStatements(block *ast.BlockStatement, env *object.Environment) object.Object{
@@ -201,11 +208,23 @@ func evalInfixExpression(operator string, left object.Object, right object.Objec
 			return nativeBoolToBooleanObject(left == right)
 		case operator == "!=" :
 			return nativeBoolToBooleanObject(left != right)
-	case left.Type() != right.Type():
+		case left.Type() != right.Type():
 		  	return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
+		case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
+			return evalStringInfixExpression(operator, left, right)
 		default :
 			return newError("unknown operator: %s %s %s",left.Type(), operator, right.Type())
 	}
+}
+
+func evalStringInfixExpression(operator string, left, right object.Object) object.Object{
+	if operator != "+"{
+		return newError("unknown operator: %s %s %s", left.Type(), operator ,right.Type())
+	}
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+
+	return &object.String{Value: leftVal + rightVal}
 }
 
 func evalIntegerInfixExpression(operator string, leftVal object.Object, rightVal object.Object) object.Object{

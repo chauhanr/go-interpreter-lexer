@@ -66,6 +66,9 @@ func (l *Lexer) NextToken() token.Token{
 				t = newToken(token.MINUS, l.ch)
 			case 0 :
 				t = token.Token{token.EOF, ""}
+			case '"':
+				t.Type = token.STRING
+				t.Literal = l.readString()
 			default:
 				if isLetter(l.ch){
 					t.Literal = l.readIdentifier()
@@ -84,6 +87,18 @@ func (l *Lexer) NextToken() token.Token{
 	return t
 }
 
+/** keep reading until we find the end of the string " or EOF */
+func (l *Lexer) readString() string{
+	pos := l.position+1
+	for{
+		//fmt.Printf("char %s", l.ch)
+		l.readChar()
+		if l.ch == '"' || l.ch == 0{
+			break
+		}
+	}
+	return l.input[pos:l.position]
+}
 
 func isDigit(ch byte) bool{
 	return ch >= '0' && ch <= '9'

@@ -188,6 +188,7 @@ func TestErrorHandling (t *testing.T){
 			}
 		`, "unknown operator: BOOLEAN + BOOLEAN"},
 		{"foobar", "identifier not found: foobar"},
+		{`"Hello"-"World"`, "unknown operator: STRING - STRING"},
 	}
 
 	for _, tt :=range tests{
@@ -253,6 +254,7 @@ func TestFunctionApplication(t *testing.T){
 		{"let add = fn(x, y) { x + y; }; add(4, 6);", 10},
 		{"let add = fn(x, y) { x + y; }; add(4 + 6, add(5,5));", 20},
 		{ "fn(x) {x; }(5)", 5},
+		{`fn( ) { 5;}()`, 5},
 	}
 
 	for _, tt := range tests{
@@ -270,4 +272,58 @@ func TestClosures(t *testing.T){
 
 	testIntegerObject(t, testEval(input), 4)
 
+}
+
+func TestStringLiteralExpression(t *testing.T){
+	input := `fn() {"hello world!"}();`
+	evaluated := testEval(input)
+	str, ok := evaluated.(*object.String)
+	if !ok{
+		t.Fatalf("expected object.String got :%T", evaluated)
+	}
+	if str.Value != "hello world!" {
+		t.Fatalf("expected value %s but got %s","hello world!" ,str.Value)
+	}
+}
+
+func TestStringConcatenation(t *testing.T){
+	input := `"Hello"+" "+"World!"`
+	evaluated := testEval(input)
+	str, ok := evaluated.(*object.String)
+	if !ok {
+		t.Fatalf("Object is not String. got= %T", evaluated)
+	}
+	if str.Value != "Hello World!" {
+		t.Fatalf("The expected value of concatenated string %s but got %s", "Hello World!",str.Value)
+	}
+}
+
+func TestBuiltInFunction(t *testing.T){
+	tests := [] struct{
+		input string
+		expected interface{}
+	}{
+		{`len("")`, 0},
+		{`len("four")`, 4},
+		{"len(1)", "argument to `len` not supported, got INTEGER"},
+		{`len("one", "two")`, "wrong number of arguments. got 2, want=1"},
+
+	}
+
+	for _, tt := range tests{
+		evaluated := testEval(tt.input)
+		switch expected := tt.expected.(type){
+		case int:
+			testIntegerObject(t,evaluated,int64(expected))
+		case string:
+			errObj, ok := evaluated.(*object.Error)
+			if !ok{
+				t.Errorf("object is not error got.%T(+v)", evaluated, evaluated)
+				continue
+			}
+			if errObj.Message != expected{
+				t.Errorf("wrong error message. expected %q got %q", expected, errObj.Message)
+			}
+		}
+	}
 }

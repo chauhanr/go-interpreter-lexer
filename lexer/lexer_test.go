@@ -48,6 +48,8 @@ if (5 < 10) {
 9 != 10;
 "foobar";
 "bar foo";
+[1, 2];
+{"foo" : "bar"};
 `,
 
 		[]expectedTokens{
@@ -128,9 +130,19 @@ if (5 < 10) {
 			{token.SEMICOLON, ";"},
 			{token.STRING, "bar foo"},
 			{token.SEMICOLON, ";"},
+			{token.LBRACKET, "["},
+			{token.INT, "1"},
+			{token.COMMA, ","},
+			{token.INT, "2"},
+			{token.RBRACKET, "]"},
+			{token.SEMICOLON, ";"},
+			{token.LBRACE, "{"},
+			{token.STRING, "foo"},
+			{token.COLON, ":"},
+			{token.STRING, "bar"},
+			{token.RBRACE, "}"},
+			{token.SEMICOLON, ";"},
 			{token.EOF, ""},
-
-
 		},
 	},
 }

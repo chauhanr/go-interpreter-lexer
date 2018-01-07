@@ -27,7 +27,9 @@ const(
 	RBRACE = "}"
 	COMMA = ","
 	SEMICOLON = ";"
-
+	LBRACKET = "["
+	RBRACKET = "]"
+	COLON = ":"
 
 	// Keywords
 	FUNCTION = "FUNCTION"
